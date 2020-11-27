@@ -2,28 +2,25 @@ import argparse, socket, json, requests, ipaddress, subprocess, os
 from ipwhois import IPWhois
 from pprint import pprint
 
-def scanport(addr, port):
-    socket_obj = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-    socket.setdefaulttimeout(1)
-    result = socket_obj.connect_ex((addr,port))
-    socket_obj.close()
-
-    if result == 0:
-        machine_hostname = socket.gethostbyaddr(addr)[0]
-        service = socket.getservbyport(port)
-        print('--------------------  Ports - Services  --------------------')
-        print("Open Port on: " + str(addr) + " \n-- Open Port: " + str(port) + " \n-- Service Name: " + str(service) + " \n-- Hostname: " + str(machine_hostname))
-        print('------------------------------------------------------------\n')
-        return port
-    else:
-        return None
-
-def main(ipi, ar, b, t, sp, ep, op, cv):
+def main(ip, p, ipi, ar, b, t, sp, ep, op, cv): 
+    if args.ip and args.p:
+        socket_obj = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        socket.setdefaulttimeout(1)
+        result = socket_obj.connect_ex((args.ip,args.p))
+        socket_obj.close()
+        if result == 0:
+            machine_hostname = socket.gethostbyaddr(args.ip)[0]
+            service = socket.getservbyport(args.p)
+            print('--------------------  Ports - Services  --------------------')
+            print("Open Port on: " + str(args.ip) + " \n-- Open Port: " + str(args.p) + " \n-- Service Name: " + str(service) + " \n-- Hostname: " + str(machine_hostname))
+            print('------------------------------------------------------------\n')
+        else:
+            return None
     if args.op:
         try:
             open_ports = []
             for port in range(sp, ep):
-                open_port = scanport(a, port)
+                open_port = scanport(op, port)
                 if open_port is None:
                     continue
                 else:
@@ -116,7 +113,9 @@ def main(ipi, ar, b, t, sp, ep, op, cv):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Slim's Network Mapper v1.0")
     ap = argparse.ArgumentParser(prog='smap.py', usage='')# usage='%(prog)s [options] -ipi ip to grab information on')
-    ap.add_argument('-op', type=str, help='Input IP Address to get open ports from')
+    ap.add_argument('-ip', type=str, help='Input IP address to check for a single open port')
+    ap.add_argument('-p', type=str, help='Input single port to check if it is open')
+    ap.add_argument('-op', type=str, help='Input IP Address to check for multiple open ports')
     ap.add_argument('-ipi', type=str, help='Input IP address to get information on')
     ap.add_argument('-ar', type=str, help='Input IP address (192.165.0.1, 192.165.1.0) to get all live ips in that range')
     ap.add_argument('-b', type=str, help='Scan all open ports for banners from services')
@@ -125,6 +124,8 @@ if __name__ == "__main__":
     ap.add_argument('-sp', type=int, help='Starting port')
     ap.add_argument('-ep', type=int, help='End port')
     args = ap.parse_args()
+    ip = args.ip
+    p = args.p
     op = args.op
     ipi = args.ipi
     ar = args.ar
@@ -133,4 +134,4 @@ if __name__ == "__main__":
     sp = args.sp
     ep = args.ep
     cv = args.cv
-    main(ipi, ar, b, t, sp, ep, op, cv)
+    main(ip, p, ipi, ar, b, t, sp, ep, op, cv)
